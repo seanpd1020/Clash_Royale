@@ -1,0 +1,8 @@
+#include "minion.h"
+#include <QPixmap>
+#include <QTimer>
+
+Minion::Minion(QGraphicsItem *parent):QObject(), QGraphicsPixmapItem(parent)
+{
+    
+}

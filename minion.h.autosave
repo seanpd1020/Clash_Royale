@@ -1,0 +1,21 @@
+#ifndef MINION_H
+#define MINION_H
+
+#include <QGraphicsPixmapItem>
+#include <QGraphicsPolygonItem>
+#include <QGraphicsItem>
+#include <QPointF>
+#include <QObject>
+
+class Minion:public QObject, public QGraphicsPixmapItem
+{
+    Q_OBJECT
+public:
+    Minoin(QGraphicsItem *parent=0);
+    double distance(QGraphicsItem *item);
+    virtual void fire();
+public slots:
+    void moveForward();
+};
+
+#endif // MINION_H

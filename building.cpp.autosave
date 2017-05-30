@@ -1,0 +1,78 @@
+#include "building.h"
+#include <QPixmap>
+#include <QVector>
+#include <QPointF>
+#include <QPolygonF>
+//#include "bullet.h"
+#include <QLineF>
+#include "game.h"
+#include <QTimer>
+#include <QGraphicsRectItem>
+#include "myminions.h"
+#include "shell.h"
+//#include "enemy.h"
+
+extern Game *game;
+
+Building::Building(QGraphicsItem *parent):QObject(), QGraphicsPixmapItem(parent)
+{
+    QVector<QPointF> point;
+    point << QPoint(1.5,0) << QPoint(3,0) << QPoint(4.5,1.5) << QPoint(4.5,3) << QPoint(3,4.5) << QPoint(1.5,4.5) << QPoint(0,3) << QPoint(0,1.5);
+
+    int factor = 75;
+    for (size_t i = 0, n = point.size(); i < n; i++){
+        point[i] = factor*point[i];
+    }
+
+    attack_area = new QGraphicsPolygonItem(QPolygonF(point),this);
+
+    QPointF poly_center(1.5,1.5);
+    poly_center = factor*poly_center;
+    poly_center = mapToScene(poly_center);
+    QPointF tower_center(x()+44,y()+44);
+    QLineF ln(poly_center,tower_center);
+    attack_area->setPos(x()+ln.dx(),y()+ln.dy());
+
+    attack_destination = QPointF(0,0);
+    has_target = false;
+}
+double Building::distance(QGraphicsItem *item)
+{
+    QLineF ln(this->pos(),item->pos());
+    return ln.length();
+}
+void Building::fire()
+{
+    Shell *shell=new Shell();
+    shell->setPos(x()+44,y()+44);
+    QLineF ln(QPointF(x()+44,y()+44),attack_destination);
+    int angle = -1 * ln.angle();
+    shell->setRotation(angle);
+    game->scene->addItem(shell);
+}
+void Building::aim_target()
+{
+    QList<QGraphicsItem *> colliding_items = attack_area->collidingItems();
+    has_target = false;
+    double closest_distance = 300;
+    QPointF closest_point(0,0);
+    for (size_t i = 0, n = colliding_items.size(); i < n; ++i)
+    {
+        Minions * m = dynamic_cast<Minions *>(colliding_items[i]);
+
+        if (m)
+        {
+            double this_distance = distance(colliding_items[i]);
+            if (this_distance < closest_distance){
+                closest_distance = this_distance;
+                closest_point = colliding_items[i]->pos();
+                has_target = true;
+            }
+        }
+    }
+
+    if (has_target){
+        attack_destination = closest_point;
+        fire();
+    }
+}
