@@ -1,2 +1,1 @@
-# temporarily
-pro3
+使用 Qt 開發的守城小遊戲
